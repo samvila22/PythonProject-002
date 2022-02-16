@@ -1,0 +1,199 @@
+#Lab 4
+#Sam Vila
+#CPE 202
+
+class Node:
+    def __init__(self, value, rest):
+        self.value = value      # object reference stored in Node
+        self.rest = rest        # reference to NodeList
+    def __eq__(self, other):
+        return ((type(other) == Node)
+          and self.value == other.value
+          and self.rest == other.rest
+        )
+    def __repr__(self):
+        return ("Node({!r}, {!r})".format(self.value, self.rest))
+
+
+class OrderedList():
+    def __init__(self):
+        self.head = None
+        self.capacity = 0
+        self.tail = None
+
+    def __repr__(self):
+        if self.head.data is None:
+            return "No values in the list"
+        else:
+            return "Node(%s, %s)" % (self.head.data, self.head.next)
+
+    def __eq__(self, other):
+        return self.head == other.head
+
+    def add(self, item):
+        #add item to the list
+        current = self.head
+        previous = None
+        stop = False
+        while current != None and not stop:
+            if current.getData() > item:
+                stop = True
+            else:
+                previous = current
+                current = current.getNext()
+        #make temp for our new item
+        temp = Node(item)
+        if self.capacity == 0:
+            #if empty list
+            temp.setNext(None)
+            temp.setPrev(None)
+            self.head = temp
+            self.tail = temp
+        elif previous == None:
+            #temp is head
+            temp.setNext(self.head)
+            if self.capacity == 1:
+                self.tail = self.head
+            self.head.setPrev(temp)
+            self.head = temp
+        elif current == None:
+            #temp is tail
+            temp.setPrev(self.tail)
+            self.tail.setNext(temp)
+            self.tail = temp
+            self.tail.setNext(None)
+        else:
+            #temp is elsewhere
+            temp.setNext(current)
+            temp.setPrev(previous)
+            previous.setNext(temp)
+            current.setPrev(temp)
+        self.capacity += 1
+
+    def remove(self, item):
+        #removes item from the list if item is present
+        index = 0
+        start = self.head
+        while index < self.capacity:
+            if start.getData() == item:
+                if self.capacity == 1:
+                    self.head = None
+                    self.tail = None
+                elif index == 0:
+                    self.head = start.getNext()
+                elif index == self.capacity-1:
+                    start.getPrev().setNext(None)
+                    self.tail = start.getPrev()
+                else:
+                    start.getNext().setPrev(start.getPrev())
+                    start.getPrev().setNext(start.getNext())
+                self.capacity -= 1
+                break
+            else:
+                start = start.getNext()
+                index += 1
+
+    def search_forward(self, item):
+        # search starting at head
+        index = 0
+        start = self.head
+        while index < self.capacity:
+            if start.getData() == item:
+                return True
+            else:
+                start = start.getNext()
+                index += 1
+        return False
+
+    def search_backward(self, item):
+        #search starting at tail
+        index = self.capacity -1
+        start = self.tail
+        while index >= 0:
+            if start.getData() == item:
+                return True
+            else:
+                start = start.getPrev()
+                index -= 1
+        return False
+
+    def is_empty(self):
+        #check if list is empty
+        return self.capacity == 0
+
+    def size(self):
+        #compute the size of the list
+        return self.capacity
+
+    def index(self, item):
+        #return the position of the item in list
+        index = 0
+        start = self.head
+        while index < self.capacity:
+            if start.getData() == item:
+                return index
+            else:
+                start = start.getNext()
+                index += 1
+
+    def pop(self):
+        #Removes and returns the item at the end of list
+        temp = self.tail.getData()
+        self.tail = self.tail.getPrev()
+        if self.capacity == 1:
+            self.head = None
+            self.capacity -= 1
+            return temp
+        self.tail.setNext(None)
+        self.capacity -= 1
+        return temp
+
+    def pop_pos(self, pos):
+        # Removes and returns the item at the given position
+        index = 0
+        start = self.head
+        #first half of list
+        if pos <= self.capacity // 2:
+            while index < self.capacity:
+                if index == pos:
+                    temp = start.getData()
+                    if self.capacity == 1:
+                        self.head = None
+                        self.tail = None
+                    elif index == 0:
+                        self.head = start.getNext()
+                    elif index == self.capacity-1:
+                        start.getPrev().setNext(None)
+                        self.tail = start.getPrev()
+                    else:
+                        start.getNext().setPrev(start.getPrev())
+                        start.getPrev().setNext(start.getNext())
+                    self.capacity -= 1
+                    return temp
+                else:
+                    start = start.getNext()
+                    index += 1
+        #second half of list
+        elif pos > self.capacity//2:
+            index = self.capacity -1
+            start = self.tail
+            while index >= 0:
+                if index == pos:
+                    temp = start.getData()
+                    if self.capacity == 1:
+                        self.head = None
+                        self.tail = None
+                    elif index == 0:
+                        self.head = start.getNext()
+                    elif index == self.capacity-1:
+                        start.getPrev().setNext(None)
+                        self.tail = start.getPrev()
+                    else:
+                        start.getPrev().setNext(start.getNext())
+                        start.getNext().setPrev(start.getPrev())
+                    self.capacity -= 1
+                    return temp
+                else:
+                    start = start.getPrev()
+                    index -= 1
+
